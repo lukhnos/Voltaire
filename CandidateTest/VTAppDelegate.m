@@ -188,9 +188,11 @@
     
     if (_currentFont == _keyLabelsFont) {
         _keyLabelsFont = [[sender convertFont:_currentFont] retain];
+        _currentFont = _keyLabelsFont;
     }
     else {
         _candidatesFont = [[sender convertFont:_currentFont] retain];        
+        _currentFont = _candidatesFont;
     }
     
     [tmp release];
