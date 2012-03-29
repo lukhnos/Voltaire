@@ -65,7 +65,7 @@
     _keyLabelsFont = [[NSFont systemFontOfSize:24.0] retain];
     _candidatesFont = [[NSFont systemFontOfSize:36.0] retain];
     
-    _candidatesSource = [[NSArray arrayWithObjects:@"中文", @"輸入", @"法", @"café", @"あ", @"", @"查理", @"简体字", @"lô-má-jī", @"4 (CJK Ext B)", @"文字", @"很長的文字", @"更長更長的文字", @"foo", @"bar", @"☆", @"☆☆", @"☆☆☆", @"☆☆☆☆", @"☆☆☆☆☆", nil] retain];
+    _candidatesSource = [[NSArray arrayWithObjects:@"中文", @"輸入", @"法", @"café", @"あ", @"😄", @"查理", @"简体字", @"lô-má-jī", @"4 (CJK Ext B)", @"文字", @"很長的文字", @"更長更長的文字", @"foo", @"bar", @"☆", @"☆☆", @"☆☆☆", @"☆☆☆☆", @"☆☆☆☆☆", nil] retain];
 
     _horizontalCandidateController = [[VTHorizontalCandidateController alloc] init];
     _verticalCandidateController = [[VTVerticalCandidateController alloc] init];
