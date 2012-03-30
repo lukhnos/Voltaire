@@ -51,7 +51,6 @@
     _candidateController.delegate = self;        
     _candidateController.keyLabelFont = _keyLabelsFont;
     _candidateController.candidateFont = _candidatesFont;
-    _candidateController.CJKCandidateFont = _candidatesFont;
     _candidateController.keyLabels = _keyLabels; 
 
     NSRect frameRect = [[self window] frame];
