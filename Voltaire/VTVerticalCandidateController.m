@@ -60,7 +60,7 @@ static const CGFloat kCandidateTextLeftMargin = 8.0;
     NSUInteger styleMask = NSBorderlessWindowMask | NSNonactivatingPanelMask;
     
     NSPanel *panel = [[[NSPanel alloc] initWithContentRect:contentRect styleMask:styleMask backing:NSBackingStoreBuffered defer:NO] autorelease];
-    [panel setLevel:CGShieldingWindowLevel() + 1];
+    [panel setLevel:kCGPopUpMenuWindowLevel];
     [panel setHasShadow:YES];
 
     self = [self initWithWindow:panel];
@@ -92,7 +92,8 @@ static const CGFloat kCandidateTextLeftMargin = 8.0;
         [_tableView setDataSource:self];
         [_tableView setDelegate:self];
         
-        NSTableColumn *column = [[[NSTableColumn alloc] initWithIdentifier:@"candidate"] autorelease];    
+        NSTableColumn *column = [[[NSTableColumn alloc] initWithIdentifier:@"candidate"] autorelease];
+        [column setDataCell:[[[NSTextFieldCell alloc] init] autorelease]];
         [column setEditable:NO];
         
         [_tableView addTableColumn:column];
@@ -236,17 +237,12 @@ static const CGFloat kCandidateTextLeftMargin = 8.0;
             }
         }
         
-        if (newHilightIndex != _keyLabelStripView.highlightedIndex) {
+        if (newHilightIndex != _keyLabelStripView.highlightedIndex && newHilightIndex >= 0) {
             _keyLabelStripView.highlightedIndex = newHilightIndex;
             [_keyLabelStripView setNeedsDisplay:YES];            
         }
     }
 
-    // fix a subtle on 10.7 that, since we force the scroller to appear, scrolling sometimes shows a temporarily "broken" scroll bar (but quickly disappears)
-    if ([_scrollView hasVerticalScroller]) {
-        [[_scrollView verticalScroller] setNeedsDisplay];
-    }
-    
     return attrString;
 }
 
@@ -258,6 +254,13 @@ static const CGFloat kCandidateTextLeftMargin = 8.0;
         NSInteger firstVisibleRow = [_tableView rowAtPoint:[_scrollView documentVisibleRect].origin];
         _keyLabelStripView.highlightedIndex = selectedRow - firstVisibleRow;
         [_keyLabelStripView setNeedsDisplay:YES];
+
+        // fix a subtle OS X "bug" that, since we force the scroller to appear,
+        // scrolling sometimes shows a temporarily "broken" scroll bar
+        // (but quickly disappears)
+        if ([_scrollView hasVerticalScroller]) {
+            [[_scrollView verticalScroller] setNeedsDisplay];
+        }
     }    
 }
 
@@ -339,6 +342,12 @@ static const CGFloat kCandidateTextLeftMargin = 8.0;
                            
 - (void)layoutCandidateView
 {
+     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(doLayoutCanaditeView) object:nil];
+     [self performSelector:@selector(doLayoutCanaditeView) withObject:nil afterDelay:0.0];
+}
+
+- (void)doLayoutCanaditeView
+{
     NSUInteger count = [_delegate candidateCountForController:self];
     if (!count) {
         return;
@@ -379,9 +388,19 @@ static const CGFloat kCandidateTextLeftMargin = 8.0;
     
     CGFloat rowHeight = ceil(fontSize * 1.25);
     [_tableView setRowHeight:rowHeight];
-    
+
+    CGFloat maxKeyLabelWidth = keyLabelFontSize;
+    NSDictionary *textAttr = [NSDictionary dictionaryWithObjectsAndKeys:
+                              _keyLabelFont, NSFontAttributeName,
+                              nil];
+    NSSize boundingBox = NSMakeSize(1600.0, 1600.0);
+    for (NSString *label in _keyLabels) {
+        NSRect rect = [label boundingRectWithSize:boundingBox options:NSStringDrawingUsesLineFragmentOrigin attributes:textAttr];
+        maxKeyLabelWidth = max(rect.size.width, maxKeyLabelWidth);
+    }
+
     CGFloat rowSpacing = [_tableView intercellSpacing].height;    
-    CGFloat stripWidth = ceil(keyLabelFontSize * 1.20);
+    CGFloat stripWidth = ceil(maxKeyLabelWidth * 1.20);
     CGFloat tableViewStartWidth = ceil(_maxCandidateAttrStringWidth + scrollerWidth);;
     CGFloat windowWidth = stripWidth + 1.0 + tableViewStartWidth;
     CGFloat windowHeight = keyLabelCount * (rowHeight + rowSpacing);
@@ -394,6 +413,6 @@ static const CGFloat kCandidateTextLeftMargin = 8.0;
     
     [_keyLabelStripView setFrame:NSMakeRect(0.0, 0.0, stripWidth, windowHeight)];
     [_scrollView setFrame:NSMakeRect(stripWidth + 1.0, 0.0, tableViewStartWidth, windowHeight)];
-    [[self window] setFrame:frameRect display:YES];
+    [[self window] setFrame:frameRect display:NO];
 }
 @end

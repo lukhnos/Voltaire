@@ -31,7 +31,7 @@
 
 @interface VTAppDelegate : NSWindowController <NSApplicationDelegate>
 {
-    __weak NSFont *_currentFont;
+    NSFont *_currentFont;
     NSFont *_keyLabelsFont;
     NSFont *_candidatesFont;
     
@@ -39,7 +39,7 @@
     NSArray *_candidates;
     NSArray *_keyLabels;
     
-    __weak VTCandidateController *_candidateController;
+    VTCandidateController *_candidateController;
     VTCandidateController *_horizontalCandidateController;
     VTCandidateController *_verticalCandidateController;
 }
